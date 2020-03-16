@@ -5,7 +5,7 @@
 #include "ctc_beam_scorer.h"
 #include "ctc_beam_search.h"
 
-int ctc_beam_search_decoder(float* inputs, int* sequence_length, 
+extern "C" int ctc_beam_search_decoder(float* inputs, int* sequence_length, 
                             int beam_width, int top_paths, int max_time,
                             int batch_size, int num_classes,
                             int* decoded, float* log_probabilities)

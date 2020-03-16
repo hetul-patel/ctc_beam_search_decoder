@@ -23,7 +23,7 @@
 //      log_probabilities  : 2-D float array, size [batch_size, top_paths] containing
 //                           containing sequence log-probabilities
 // ------------------------------------------------------------------------------------
-int ctc_beam_search_decoder(float* inputs, int* sequence_length, 
+extern "C" int ctc_beam_search_decoder(float* inputs, int* sequence_length, 
                             int beam_width, int top_paths, int max_time,
                             int batch_size, int num_classes,
                             int* decoded, float* log_probabilities);
