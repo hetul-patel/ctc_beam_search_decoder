@@ -1,2 +1,3 @@
-# ctc_beam_search_decoder
-Shared library for ctc beam search decoder
+# CTC Word Beam Search Decoder
+
+**CTC decoder | C++ implementation | Python implementation**
