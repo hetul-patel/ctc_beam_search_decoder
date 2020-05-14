@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.15)
 project(ctc_beam_search_decoder)
 
 set(CMAKE_CXX_STANDARD  14)
-# set(CMAKE_CXX_FLAGS     "-march=native")
+set(CMAKE_CXX_FLAGS     "-O3")
 
 ###############################################################################
 ## file globbing ##############################################################
