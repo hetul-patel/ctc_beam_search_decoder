@@ -14,7 +14,7 @@ int main()
     // int ctc_beam_search_decoder(float* inputs, int* sequence_length, 
     //                         int beam_width, int top_paths, int max_time,
     //                         int batch_size, int num_classes,
-    //                         int* decoded, float* log_probabilities);
+    //                         int* decoded, float* log_probabilities, bool batch_first);
 
 
     // Prepare Inputs

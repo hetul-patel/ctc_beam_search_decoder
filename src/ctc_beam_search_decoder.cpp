@@ -5,13 +5,38 @@
 #include "ctc_beam_scorer.h"
 #include "ctc_beam_search.h"
 
+void permuteBatchFirstToBatchSecond(float* inputs, float* output, 
+                    int max_time,int batch_size, int num_classes)
+{
+    size_t t,b,c;
+    size_t max_t_num_classes = max_time*num_classes;
+    size_t num_classes_batch_size = num_classes*batch_size;
+    for ( b = 0; b < batch_size; ++b)
+    {
+        for ( t = 0; t < max_time; ++t)
+        {
+            memcpy(output + b*num_classes + t*num_classes_batch_size, inputs, num_classes*sizeof(float));
+            inputs += num_classes;                
+        }
+    }
+}
+
 extern "C" int ctc_beam_search_decoder(float* inputs, int* sequence_length, 
                             int beam_width, int top_paths, int max_time,
                             int batch_size, int num_classes,
-                            int* decoded, float* log_probabilities)
+                            int* decoded, float* log_probabilities, bool batch_first)
 {
 
-    //Create Default beam scorer class object     
+    // Permute input if batch_first is true.
+    float* batchFirstInp = nullptr;
+    if(batch_first)
+    {
+        batchFirstInp = new float[batch_size*max_time*num_classes];
+        permuteBatchFirstToBatchSecond(inputs, batchFirstInp, max_time, batch_size, num_classes);
+        inputs = batchFirstInp;
+    }
+
+    // Create Default beam scorer class object     
     ctc::CTCBeamSearchDecoder<float>::DefaultBeamScorer default_scorer;
 
 
@@ -54,19 +79,22 @@ extern "C" int ctc_beam_search_decoder(float* inputs, int* sequence_length,
     int status = -1;
     status = decoder.Decode(seq_len, eigen_inputs, &outputs, &scores);
     
-    if(status != 0)
-        return status;
-
-    // Copy Paths to Output Matrix
-    int path,batch;
-    for (path = 0; path < top_paths; ++path) {
-        for (batch = 0; batch < batch_size; ++batch){
-            if(outputs[path][batch].size() < max_time)
-                outputs[path][batch].resize(max_time,-1);
-            std::copy(outputs[path][batch].begin(),outputs[path][batch].end(),decoded);
-            decoded += max_time;
+    if(status == 0)
+    {
+        // Copy Paths to Output Matrix
+        int path,batch;
+        for (path = 0; path < top_paths; ++path) {
+            for (batch = 0; batch < batch_size; ++batch){
+                if(outputs[path][batch].size() < max_time)
+                    outputs[path][batch].resize(max_time,-1);
+                std::copy(outputs[path][batch].begin(),outputs[path][batch].end(),decoded);
+                decoded += max_time;
+            }
         }
     }
+
+    // Free auxillary buffer used for permutation
+    delete[] batchFirstInp;
 
     return status;
 }

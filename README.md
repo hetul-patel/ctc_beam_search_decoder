@@ -2,6 +2,10 @@
 
 **CTC decoder | C++ implementation | Python implementation**
 
+## Recent Update
+
+**`2020-05-22`**: Now both input shapes `[batch_size x timesteps x num_classes]` and `[timesteps x batch_size x num_classes]` are supported.
+
 ## Python
 
 The following code-skeleton gives a first impression of how to use the decoding algorithm with Python. More details can be found in the python_demo dir.

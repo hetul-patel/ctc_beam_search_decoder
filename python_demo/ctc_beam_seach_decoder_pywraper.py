@@ -24,10 +24,11 @@ ctc_lib = ctypes.CDLL(lib_dir+lib_name)
 cfloatptr   = ctl.ndpointer(ctypes.c_float, flags="C_CONTIGUOUS")
 cintptr     = ctl.ndpointer(ctypes.c_int, flags="C_CONTIGUOUS")
 cint        = ctypes.c_int
+cbool       = ctypes.c_bool
 
 py_ctc_beam_search_decoder = ctc_lib.ctc_beam_search_decoder
 py_ctc_beam_search_decoder.argtypes = [cfloatptr, cintptr, cint, cint, cint, cint, 
-                                        cint, cintptr, cfloatptr]
+                                        cint, cintptr, cfloatptr, cbool]
           
 
 # ------------------------------------------------------------------------------------
@@ -47,11 +48,15 @@ py_ctc_beam_search_decoder.argtypes = [cfloatptr, cintptr, cint, cint, cint, cin
 #      log_probabilities  : 2-D float array, size [batch_size, top_paths] containing
 #                           containing sequence log-probabilities
 # ------------------------------------------------------------------------------------
-def ctc_beam_search_decoder(inputs, sequence_length, beam_width=100, top_paths=1):
+def ctc_beam_search_decoder(inputs, sequence_length, beam_width=100, top_paths=1, batch_first=False):
     
     # prepare shape inputs
-    max_time      = inputs.shape[0]
-    batch_size    = inputs.shape[1]
+    if batch_first:
+        batch_size    = inputs.shape[0]
+        max_time      = inputs.shape[1]
+    else:
+        max_time      = inputs.shape[0]
+        batch_size    = inputs.shape[1]
     num_classes   = inputs.shape[2]
     
     # Allocate output matrix for storing decoded outputs
@@ -67,7 +72,8 @@ def ctc_beam_search_decoder(inputs, sequence_length, beam_width=100, top_paths=1
                                         batch_size,
                                         num_classes,
                                         decoded,
-                                        log_probabilities)
+                                        log_probabilities,
+                                        batch_first)
     if status != 0:
         return None, None
     
