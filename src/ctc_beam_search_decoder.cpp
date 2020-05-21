@@ -20,7 +20,7 @@ extern "C" int ctc_beam_search_decoder(float* inputs, int* sequence_length,
     // using Eigen::Map.
     Eigen::Map<const Eigen::ArrayXi> seq_len(&sequence_length[0], batch_size);
     std::vector<Eigen::Map<const Eigen::Matrix<float, 
-                            Eigen::Dynamic, Eigen::Dynamic>>> eigen_inputs;
+                            Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>> eigen_inputs;
     eigen_inputs.reserve(max_time);
     for (int t = 0; t < max_time; ++t) {
         //eigen_inputs.emplace_back(&inputs[t][0][0], batch_size, num_classes);
@@ -43,13 +43,13 @@ extern "C" int ctc_beam_search_decoder(float* inputs, int* sequence_length,
 
     
     // Define score matrix for top_paths of shape: (batch_size x top_paths)
-    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic>> scores(
+    Eigen::Map<Eigen::Matrix<float, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>> scores(
             log_probabilities, batch_size, top_paths);
 
     
     // Create CTC decoder object and pass default_scorer to it
     // second arg is beam_width which is 10 times the top_paths
-    ctc::CTCBeamSearchDecoder<float> decoder(num_classes, beam_width, &default_scorer);
+    ctc::CTCBeamSearchDecoder<float> decoder(num_classes, beam_width, &default_scorer, batch_size);
 
     int status = -1;
     status = decoder.Decode(seq_len, eigen_inputs, &outputs, &scores);

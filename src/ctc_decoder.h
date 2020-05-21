@@ -22,10 +22,10 @@ template <class T>
 class CTCDecoder {
 public:
     typedef Eigen::Map<const Eigen::ArrayXi> SequenceLength;
-    typedef Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>
+    typedef Eigen::Map<const Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
             Input;
     typedef std::vector<std::vector<int>> Output;
-    typedef Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic>>
+    typedef Eigen::Map<Eigen::Matrix<T, Eigen::Dynamic, Eigen::Dynamic, Eigen::RowMajor>>
             ScoreOutput;
 
     CTCDecoder(int num_classes, int batch_size, bool merge_repeated)

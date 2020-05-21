@@ -20,20 +20,30 @@ int main()
     // Prepare Inputs
 
     const int max_time      =  5;
-    const int batch_size    =  1;
+    const int batch_size    =  2;
     const int num_classes   =  6;
     const int beam_width    = 50;
     const int top_paths     = 10;
 
+    // float inputs[max_time][batch_size][num_classes] = {
+    //         {{0.6, 0.0, 0.0, 0.4, 0.0, 0.0 }},
+    //         {{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 }},
+    //         {{0.0, 0.4, 0.0, 0.6, 0.0, 0.0 }},
+    //         {{0.0, 0.4, 0.0, 0.1, 0.0, 0.5 }},
+    //         {{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 }}
+    //     };  
+
+    // int sequence_length[batch_size] = {max_time};
+
     float inputs[max_time][batch_size][num_classes] = {
-            {{0.6, 0.0, 0.0, 0.4, 0.0, 0.0 }},
-            {{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 }},
-            {{0.0, 0.4, 0.0, 0.6, 0.0, 0.0 }},
-            {{0.0, 0.4, 0.0, 0.1, 0.0, 0.5 }},
-            {{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 }}
+            {{0.6, 0.0, 0.0, 0.4, 0.0, 0.0 },{0.6, 0.0, 0.0, 0.4, 0.0, 0.0 }},
+            {{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 },{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 }},
+            {{0.0, 0.4, 0.0, 0.6, 0.0, 0.0 },{0.0, 0.4, 0.0, 0.6, 0.0, 0.0 }},
+            {{0.0, 0.4, 0.0, 0.1, 0.0, 0.5 },{0.0, 0.4, 0.0, 0.1, 0.0, 0.5 }},
+            {{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 },{0.0, 0.5, 0.0, 0.5, 0.0, 0.0 }}
         };  
 
-    int sequence_length[batch_size] = {max_time};
+    int sequence_length[batch_size] = {max_time,max_time};
     
     // The CTCDecoder works with log-probs.
     int t, b, c;
@@ -61,12 +71,16 @@ int main()
                                         &log_probabilities[0][0]);
 
     cout << "status : " << status << endl;
-
+    if(status != 0)
+        return 0;
+        
     for (int path = 0; path < top_paths; ++path) {
-        printf("\nPath_%d (prob = %.7f) = ",path,std::expf(log_probabilities[0][path]));
-        for (int i = 0; i < max_time; ++i) {
-            if(decoded[path][0][i] >= 0)
-                printf("%2d,",decoded[path][0][i]);
+        for (int b = 0; b < batch_size; ++b) {
+            printf("\nPath_%d (prob = %.7f) = ",path,std::expf(log_probabilities[0][path]));
+            for (int i = 0; i < max_time; ++i) {
+                if(decoded[path][b][i] >= 0)
+                    printf("%2d,",decoded[path][b][i]);
+            }
         }
     }
     printf("\n");
